@@ -1,4 +1,6 @@
-fastf1
+streamlit
 pandas
-requests
 numpy
+altair
+fastf1
+scikit-learn
