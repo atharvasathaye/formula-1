@@ -3,15 +3,15 @@ import pandas as pd
 import os
 import altair as alt
 import pickle
+from sklearn.ensemble import RandomForestClassifier
 
+# App setup
 st.set_page_config(page_title="🏎️ F1 2025 Predictor", layout="wide")
-
 st.title("🏁 F1 2025 Race Data Explorer & Winner Predictor")
 st.markdown("Explore telemetry data and view winning probabilities for each driver.")
-
 st.markdown("---")
 
-# Load available race data
+# Load race data
 data_dir = "data"
 csv_files = [f for f in os.listdir(data_dir) if f.endswith(".csv") and "fastf1" in f]
 
@@ -19,7 +19,8 @@ if not csv_files:
     st.warning("No FastF1 race data found. Run `main.py` to fetch race data.")
 else:
     selected_file = st.selectbox("📂 Choose a race file:", csv_files)
-    df = pd.read_csv(os.path.join(data_dir, selected_file))
+    file_path = os.path.join(data_dir, selected_file)
+    df = pd.read_csv(file_path)
 
     st.markdown("### 🧾 Data Preview")
     st.dataframe(df.head())
@@ -31,9 +32,7 @@ else:
         if 'DriverNumber' in numeric_cols:
             numeric_cols.remove('DriverNumber')
 
-        if not numeric_cols:
-            st.warning("No numeric columns found.")
-        else:
+        if numeric_cols:
             summary = df.groupby("Driver")[numeric_cols].mean().reset_index()
             metric = st.selectbox("Select a metric to visualize:", numeric_cols)
 
@@ -47,15 +46,38 @@ else:
 
     st.markdown("### 🤖 Predicted Winning Probabilities")
 
-    if os.path.exists("model.pkl"):
-        with open("model.pkl", "rb") as f:
-            model = pickle.load(f)
+    # Auto-train model if needed
+    model_path = "model.pkl"
+    model = None
 
-        X = df.select_dtypes(include='number').drop(columns=['Position'], errors='ignore')
-        probs = model.predict_proba(X)[:, 1]
+    if "Position" in df.columns and "Driver" in df.columns:
+        df['Winner'] = (df['Position'] == 1).astype(int)
+        X = df.select_dtypes(include='number').drop(columns=['Position', 'Winner'], errors='ignore')
+        y = df['Winner']
 
-        df['WinProbability'] = probs
-        win_avg = df.groupby("Driver")['WinProbability'].mean().reset_index()
-        st.dataframe(win_avg.sort_values("WinProbability", ascending=False).reset_index(drop=True))
+        try:
+            if os.path.exists(model_path):
+                with open(model_path, "rb") as f:
+                    model = pickle.load(f)
+            else:
+                model = RandomForestClassifier(n_estimators=100, random_state=42)
+                model.fit(X, y)
+                with open(model_path, "wb") as f:
+                    pickle.dump(model, f)
+                st.success("✅ Model trained and saved successfully.")
+        except Exception as e:
+            st.error(f"❌ Failed to train or load model: {e}")
+            st.stop()
     else:
-        st.warning("⚠ No model found. Train one using `train_model.py`.")
+        st.error("❌ Required columns ('Position', 'Driver') not found in dataset.")
+        st.stop()
+
+    # Predict win probabilities
+    if model is not None:
+        try:
+            probs = model.predict_proba(X)[:, 1]
+            df['WinProbability'] = probs
+            win_avg = df.groupby("Driver")['WinProbability'].mean().reset_index()
+            st.dataframe(win_avg.sort_values("WinProbability", ascending=False).reset_index(drop=True))
+        except Exception as e:
+            st.error(f"❌ Prediction failed: {e}")
