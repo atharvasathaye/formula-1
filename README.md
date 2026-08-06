@@ -1,41 +1,44 @@
-# 🏎️ F1 2025 Race Winner Predictor
+# Formula 1 Race Winner Predictor
 
-This project uses real-time and historical data from the 2025 Formula 1 season to build a machine learning pipeline that predicts race winners. It leverages the FastF1 and Ergast APIs to extract, clean, and merge detailed driver and telemetry data.
-
----
-
-## 🚀 Features
-
-- ✅ Automated data pipeline for 2025 race data (FastF1)
-- ✅ Modular Python scripts to extract, clean, and preprocess data
-- ✅ Ready for integration with machine learning models
-- ✅ GitHub-ready project layout for sharing and collaboration
+Machine learning pipeline that ingests real-time and historical Formula 1 data to predict race outcomes. The pipeline integrates the FastF1 and Ergast APIs to extract, clean, and merge driver telemetry and session data.
 
 ---
 
-## 📁 Folder Structure
+## Features
+
+- Data pipeline for Formula 1 race data ingestion via FastF1
+- Modular Python scripts for data extraction, preprocessing, and feature combination
+- Pipeline automation via central entry point
+- Streamlit web interface for model inference and results display
+
+---
+
+## Repository Structure
 
 ```
-f1-2025-predictor/
+formula-1/
 ├── data/               # Processed race data
-├── cache/              # FastF1 cache (ignored in Git)
+├── cache/              # FastF1 cache (git ignored)
 ├── src/
 │   ├── fetch_fastf1.py
 │   ├── fetch_ergast.py
 │   └── combine_features.py
-├── main.py             # Master script for running the pipeline
+├── main.py             # Pipeline execution script
+├── app.py              # Streamlit dashboard application
+├── train_model.py      # Model training script
+├── model.pkl           # Serialized model artifact
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 📦 Setup Instructions
+## Setup Instructions
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/f1-2025-predictor.git
-   cd f1-2025-predictor
+   git clone https://github.com/atharvasathaye/formula-1.git
+   cd formula-1
    ```
 
 2. Create and activate a virtual environment:
@@ -56,20 +59,10 @@ f1-2025-predictor/
 
 ---
 
-## 📊 Next Steps
-
-- Add feature engineering logic and model training
-- Integrate Streamlit for live visualization
-- Deploy model predictions and leaderboards
-
----
-
-## 🤝 Contributing
-
-Feel free to fork the repo and open a pull request with improvements or fixes!
-
----
-
-## 📜 License
+## License
 
 This project is licensed under the MIT License.
+
+## Author
+
+Atharva Sathaye
